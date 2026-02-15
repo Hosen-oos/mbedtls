@@ -1,0 +1,32 @@
+# Makefile for TLS message capture tools
+
+CC = gcc
+CFLAGS = -Wall -Wextra -O2 -g
+INCLUDES = -I./include -I./library -I./tests/include
+LIBS = -L./library -lmbedtls -lmbedx509 -lmbedcrypto -lpthread -ldl
+SRCDIR = .
+
+# Check if libraries exist
+LIBDIR = ./library
+ifeq ($(wildcard $(LIBDIR)/libmbedtls.a),)
+    # Try shared libraries
+    LIBS = -lmbedtls -lmbedx509 -lmbedcrypto -lpthread -ldl
+endif
+
+all: capture_client
+
+capture_client: capture_tls_simple.c
+	@echo "Building capture_client..."
+	$(CC) $(CFLAGS) $(INCLUDES) -o capture_client capture_tls_simple.c $(LIBS)
+	@echo "Build complete: ./capture_client"
+
+capture_server: capture_tls_messages.c
+	@echo "Building capture_server..."
+	$(CC) $(CFLAGS) $(INCLUDES) -o capture_server capture_tls_messages.c $(LIBS)
+	@echo "Build complete: ./capture_server"
+
+clean:
+	rm -f capture_client capture_server
+	rm -f *.log *.txt *.pcap
+
+.PHONY: all clean
